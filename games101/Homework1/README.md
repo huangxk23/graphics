@@ -22,7 +22,7 @@ this four steps can be illustrated  as follows:
 
 model transformation 主要对三维空间中的物体进行位置以及姿态的变换，比如平移旋转切变放缩等等。作业1中要求实现的是绕z轴的旋转：
 
-绕轴旋转可以类比二维空间中的旋转。最后一行以及最后一列都是[0,0,0,1],因为是齐次坐标系，最后添加的最后一个坐标只是为了将平移统一为linear transformation,并不参与变换。实际上的变换是在左上角的$3 \times3$的矩阵内进行计算的。绕x轴旋转时，x坐标是不会发生变化的，只有y和z的坐标发生变化，实际上就是在y和z平面上上做二维的变化，只需要将对应的yz替换成二维平面中的旋转transformation即可。
+绕轴旋转可以类比二维空间中的旋转。最后一行以及最后一列都是[0,0,0,1],因为是齐次坐标系，最后添加的最后一个坐标只是为了将平移统一为linear transformation,并不参与变换。实际上的变换是在左上角的$3 \times 3$的矩阵内进行计算的。绕x轴旋转时，x坐标是不会发生变化的，只有y和z的坐标发生变化，实际上就是在y和z平面上上做二维的变化，只需要将对应的yz替换成二维平面中的旋转transformation即可。
 
 <img src="img/2.png" title="" alt="" data-align="center">
 
@@ -338,7 +338,7 @@ What we need to do next is mapping the square $[-1,1]^2$ to the rectangle on the
 
 实际上这种过程可以通过model transformation实现，也就是window transformation.
 
-将$[-1,1] \times [-1,1]$ 映射到[-0.5,n_x - 0.5]\times [-0.5,n_y - 0.5]$.
+将$[-1,1] \times [-1,1]$ 映射到$[-0.5,n_x - 0.5] \times [-0.5,n_y - 0.5]$.
 
 1. 将[-1,-1]移动到原点
 
