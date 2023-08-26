@@ -16,7 +16,7 @@
 
 this four steps can be illustrated  as follows:
 
-<img src="file:///C:/Users/lenovo/AppData/Roaming/marktext/images/2023-08-25-11-13-06-image.png" title="" alt="" data-align="center">
+<img src="img/1.png" title="" alt="" data-align="center">
 
 ## 二、model transformation
 
@@ -24,7 +24,7 @@ model transformation 主要对三维空间中的物体进行位置以及姿态�
 
 绕轴旋转可以类比二维空间中的旋转。最后一行以及最后一列都是[0,0,0,1],因为是齐次坐标系，最后添加的最后一个坐标只是为了将平移统一为linear transformation,并不参与变换。实际上的变换是在左上角的$3 \times3$的矩阵内进行计算的。绕x轴旋转时，x坐标是不会发生变化的，只有y和z的坐标发生变化，实际上就是在y和z平面上上做二维的变化，只需要将对应的yz替换成二维平面中的旋转transformation即可。
 
-<img src="file:///C:/Users/lenovo/AppData/Roaming/marktext/images/2023-08-25-11-42-55-image.png" title="" alt="" data-align="center">
+<img src="img/2.png" title="" alt="" data-align="center">
 
 可以看到：绕y轴的旋转和绕x轴以及绕z轴的并不相同。这里说的旋转都是看向需要旋转的坐标轴并且顺时针旋转，如图。绕x轴顺时针旋转是y叉乘z,绕z轴旋转是x叉乘y但是绕y轴旋转却是z叉乘x。
 
@@ -155,7 +155,7 @@ $$
    
    left 和 right为x坐标，表示左和右，bottom和top为y坐标，表示上和下，near和far为z坐标，表示近和远。
 
-<img src="file:///C:/Users/lenovo/AppData/Roaming/marktext/images/2023-08-25-16-07-37-image.png" title="" alt="" data-align="center">
+<img src="img/3.png" title="" alt="" data-align="center">
 
    下一步需要将view volume 通过orthographic transformation 投影到 canonical view volume中。两个步骤：
 
@@ -190,7 +190,7 @@ M_{ortho} =
    
    透视投影的操作目的同样是将view volume转换为canonical view volume.
    
-   ![](C:\Users\lenovo\AppData\Roaming\marktext\images\2023-08-25-20-07-32-image.png)
+   ![](img/4.png)
    
    不过这里的view volume并不是长方体，而是frustum,之前理解错误了，我以为的是要将远平面投影到近的平面上面，因为投影吗，按照我之前学习的理解就是将一个平面投影到另一个平面上面，但是投影变换并不是如此，同样是要将view volume 投影到canonical view volume 上面去，不过此处的view volume是frustum（学了三回终于搞懂了）。
    
@@ -200,7 +200,7 @@ M_{ortho} =
    
    2. 通过正交投影将view volume 投影为canonical view volume
    
-   ![](C:\Users\lenovo\AppData\Roaming\marktext\images\2023-08-25-20-47-24-image.png)
+   ![](img/5.png)
 $$
    y'=\frac{n}{z}y\\
 x'=\frac{n}{z}x\\
@@ -318,7 +318,7 @@ $$
    
    那么实际上应该如何表示这六个数：
    
-   ![](C:\Users\lenovo\AppData\Roaming\marktext\images\2023-08-25-22-11-45-image.png)
+   ![](img/6.png)
    
    引入两个变量：
 
@@ -328,7 +328,7 @@ $$
    
    可以通过以上两个变量计算六个数值。
    
-   ![](C:\Users\lenovo\AppData\Roaming\marktext\images\2023-08-25-22-13-26-image.png)
+   ![](img/7.png)
 
 ## 五、the viewport transformation
 
