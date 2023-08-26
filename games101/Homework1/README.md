@@ -50,7 +50,6 @@ cos(\alpha)&0&sin(\alpha)&0\\
 -sin(\alpha)&0&cos(\alpha)&0\\
 0&0&0&1\\
 \end{bmatrix} 
-
 $$
 
 绕z轴旋转：
@@ -149,10 +148,10 @@ projection transformation 主要是将物体从三维空间中投影到二维的
    首先需要定义一个view volume ,个人感觉view volum实际上就是想要看的范围，比如在一个volume里面包含了一个object，当然一个object肯定不是规则的图形，但是可以用一个view volume 将其包含，将view volume通过orthographic transformation投影到canonical view volume的话，view volume中的object也在canonical view volume中，最后将view volume放大泛化的话可以是整个3D空间。在理解的过程将其视为一个长方体较好理解。
    
    长方体的定义为
-   
-   $$
-   [l,r] \times [b,t] \times [n,f]
-   $$
+
+$$
+[l,r] \times [b,t] \times [n,f]
+$$
    
    left 和 right为x坐标，表示左和右，bottom和top为y坐标，表示上和下，near和far为z坐标，表示近和远。
 
@@ -164,7 +163,7 @@ projection transformation 主要是将物体从三维空间中投影到二维的
 
 2. scaling transformation
 
-$$
+```math
 M_{ortho} = 
   \begin{bmatrix}
   \frac{2}{r-l} & 0 & 0 & 0 \\
@@ -173,8 +172,6 @@ M_{ortho} =
   0 & 0 & 0 & 1\\
   \end{bmatrix}
   \times
-
-
 \begin{bmatrix}
 1 & 0 & 0 & -\frac{r+l}{2}\\
 0 & 1 & 0 & -\frac{b+t}{2}\\
@@ -188,8 +185,7 @@ M_{ortho} =
 0 & 0 & \frac{2}{n-f} & -\frac{n+f}{n-f} \\
 0 & 0 & 0 & 1\\
 \end{bmatrix}
-$$
-
+```
 2. the perspective projection transformation
    
    透视投影的操作目的同样是将view volume转换为canonical view volume.
@@ -205,15 +201,14 @@ $$
    2. 通过正交投影将view volume 投影为canonical view volume
    
    ![](C:\Users\lenovo\AppData\Roaming\marktext\images\2023-08-25-20-47-24-image.png)
-   
-   $$
+$$
    y'=\frac{n}{z}y\\
 x'=\frac{n}{z}x\\
-   $$
+$$
    
    根据上面的公式推导可知
    
-   $$
+```math
    M_{perspective2ortho} *
 \begin{bmatrix}
 x\\
@@ -234,7 +229,7 @@ ny\\
 unknown\\
 z\\
 \end{bmatrix}
-   $$
+```
    
    为什么z是unknown的呢？
    
@@ -246,7 +241,7 @@ z\\
    
    根据上面的公式可以推知：
    
-   $$
+```math
    M_{perspective2ortho} = 
 \begin{bmatrix}
 n & 0 & 0 & 0\\
@@ -254,11 +249,11 @@ n & 0 & 0 & 0\\
 ? & ? & ? & ?\\
 0 & 0 & 0 & 1\\
 \end{bmatrix}
-   $$
+```
    
    根据1&2可以知道
    
-   $$
+$$
    M_{perspective2ortho} \times 
 \begin{bmatrix}
 x\\
@@ -278,10 +273,9 @@ ny\\
 n^2\\
 n\\
 \end{bmatrix}
-
-   $$
+$$
    
-   $$
+$$
    [0\ 0\ A\ B] \times 
 \begin{bmatrix}
 x\\
@@ -289,9 +283,9 @@ y\\
 n\\
 1\\
 \end{bmatrix} = n^2
-   $$
+$$
    
-   $$
+$$
    [0\ 0\ A\ B] \ times
 \begin{bmatrix}
 0\\
@@ -305,20 +299,20 @@ f\\
 f^2\\
 f\\
 \end{bmatrix}
-   $$
+$$
    
    so
    
-   $$
+$$
    A = n + f\\
 B = -nf
-   $$
+$$
    
    so
    
-   $$
+$$
    M_{perspective} = M_{ortho}M_{perspective2ortho}
-   $$
+$$
    
    由前面可知，需要知道[l,r],[b,t],[n,f]
    
@@ -328,9 +322,9 @@ B = -nf
    
    引入两个变量：
 
-3. vertical field of View(fovY)：垂直可视角度
+4. vertical field of View(fovY)：垂直可视角度
 
-4. aspect ratio:width / height
+5. aspect ratio:width / height
    
    可以通过以上两个变量计算六个数值。
    
@@ -354,7 +348,7 @@ What we need to do next is mapping the square $[-1,1]^2$ to the rectangle on the
 
 最终的变换矩阵为：
 
-$$
+```math
 M_{vp} = 
 \begin{bmatrix}
 1 & 0 & -0.5\\
