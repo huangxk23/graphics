@@ -7,7 +7,7 @@
 
 constexpr double MY_PI = 3.1415926;
 
-
+//计算camera transformation的变换矩阵
 Eigen::Matrix4f get_view_matrix(Eigen::Vector3f eye_pos)
 {
     Eigen::Matrix4f view = Eigen::Matrix4f::Identity();
@@ -21,6 +21,8 @@ Eigen::Matrix4f get_view_matrix(Eigen::Vector3f eye_pos)
     return view;
 }
 
+
+//计算model transformation的变换矩阵
 Eigen::Matrix4f get_model_matrix(float rotation_angle)
 {
     Eigen::Matrix4f model = Eigen::Matrix4f::Identity();
@@ -48,6 +50,8 @@ Eigen::Matrix4f get_model_matrix(float rotation_angle)
     return model;
 }
 
+
+//计算projection transformation的变换矩阵
 Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
                                       float zNear, float zFar)
 {
@@ -83,7 +87,13 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
              0,0,2.0/(zNear - zFar),0,
              0,0,0,1;
     
-    projection = ortho * translate * p2o * projection;
+    Eigen::Matrix4f transform_coordinate;
+    transform_coordinate<<1,0,0,0,
+                          0,-1,0,0,
+                          0,0,-1,0,
+                          0,0,0,1;
+
+    projection = transform_coordinate * ortho * translate * p2o * projection * transform_coordinate;
     
     return projection;
 }
@@ -92,9 +102,12 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
 int main(int argc, const char** argv)
 {
     float angle = 0;
+
+    //默认不保存图片
     bool command_line = false;
     std::string filename = "output.png";
 
+    //命令行接收参数大于等于3的保存图片
     if (argc >= 3) {
         command_line = true;
         angle = std::stof(argv[2]); // -r by default
