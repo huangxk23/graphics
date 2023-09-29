@@ -41,7 +41,7 @@ auto to_vec4(const Eigen::Vector3f& v3, float w = 1.0f)
 }
 
 
-static bool insideTriangle(int x, int y, const Vector3f* _v)
+static bool insideTriangle(float x, float y, const Vector3f* _v)
 {   
     // TODO : Implement this function to check if the point (x, y) is inside the triangle represented by _v[0], _v[1], _v[2]
     //通过叉积判断是否在三角形内部
@@ -67,14 +67,12 @@ static bool insideTriangle(int x, int y, const Vector3f* _v)
 
     for(int i = 0;i < 3;i ++)
         v[i] = _v[i],v[i].z() = 0;
-
+    
     Vector3f p{(float)x,(float)y,0};
 
     Vector3f cross1 = (v[1] - v[0]).cross(p - v[0]);
     Vector3f cross2 = (v[2] - v[1]).cross(p - v[1]);
     Vector3f cross3 = (v[0] - v[2]).cross(p - v[2]);
-
-    //std::cout<<cross1.z()<<" "<<cross2.z()<<" "<<cross3.z()<<std::endl;
 
     if((cross1.z() > 0 && cross2.z() > 0 && cross3.z() > 0) || (cross1.z() < 0 && cross2.z() < 0 && cross3.z() < 0)) return true;
     else return false;
@@ -189,34 +187,40 @@ void rst::rasterizer::rasterize_triangle(const Triangle& t) {
 
     //if(insideTriangle(350,120,t.v)) std::cout<<"Yes"<<std::endl;
     //else std::cout<<"No"<<std::endl;
-
+    
     //问题：程序像素中心的定义是？？(0,0)还是(0.5,0.5)
-    //整数，应该是(0,0)
-    //std::cout<<"another"<<std::endl;
+    //(0,0)
+    
+    std::vector<std::pair<float,float>> offset{{0.25,0.25},{0.25,0.75},{0.75,0.25},{0.75,0.75}};
     for(int i = x_min;i <= x_max;i++)
     {
         for(int j = y_min;j <= y_max;j ++)
         {
-            if(insideTriangle(i,j,t.v))
+            
+            auto[alpha, beta, gamma] = computeBarycentric2D(i, j, t.v);
+            float w_reciprocal = 1.0/(alpha / v[0].w() + beta / v[1].w() + gamma / v[2].w());
+            float z_interpolated = alpha * v[0].z() / v[0].w() + beta * v[1].z() / v[1].w() + gamma * v[2].z() / v[2].w();        
+            z_interpolated *= w_reciprocal;
+            int idx = get_index(i,j);
+            bool visible = (z_interpolated < depth_buf[idx]);
+            bool update = false;
+            Vector3f color(0.0f,0.0f,0.0f);
+
+            for(int k = 0;k < 4;k ++)
             {
-                //首先需要插值深度值
-                auto[alpha, beta, gamma] = computeBarycentric2D(i, j, t.v);
-                float w_reciprocal = 1.0/(alpha / v[0].w() + beta / v[1].w() + gamma / v[2].w());
-                float z_interpolated = alpha * v[0].z() / v[0].w() + beta * v[1].z() / v[1].w() + gamma * v[2].z() / v[2].w();
-                z_interpolated *= w_reciprocal;
-                //std::cout<<z_interpolated<<std::endl;
-                //print了一下z的插值为负数
-                              
-                int idx = get_index(i,j);
-                
-                if(z_interpolated < depth_buf[idx])
+                float x_coord = i + offset[k].first;
+                float y_coord = j + offset[k].second;
+                if(insideTriangle(x_coord,y_coord,t.v) && visible)
                 {
                     depth_buf[idx] = z_interpolated;
-                    //std::cout<<t.color[0].x()<<" "<<t.color[0].y()<<" "<<t.color[0].z()<<std::endl;
-                    set_pixel({(float)i,(float)j,0},t.color[0]);
+                    update = true;
+                    color += t.getColor() / 4.0f;        
                 }
             }
+
+            if(update) set_pixel({(float)i,(float)j,0},color);   
         }
+        
     }
 
     
