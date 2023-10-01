@@ -95,20 +95,6 @@ void rst::rasterizer::draw(pos_buf_id pos_buffer, ind_buf_id ind_buffer, col_buf
     auto& ind = ind_buf[ind_buffer.ind_id];
     auto& col = col_buf[col_buffer.col_id];
 
-    //std::cout<<pos_buf.size()<<std::endl;
-    //std::cout<<ind_buf.size()<<std::endl;
-    //std::cout<<col_buf.size()<<std::endl;
-    //sizeof(posbuf):1
-    //std::cout<<buf.size()<<std::endl;
-    //sizeof(buf):6
-    //也就是将两个三角形的vertex放到了一块，那hash_map的意义在哪里？？
-    //我觉得不应该给每个三角形的三个顶点一个key吗？？
-    //虽然后面是通过ind将两个三角形分开
-    //ind = {{0,1,2},{3,4,5}}
-    //第一个三角形的三个顶点属性对应buf和col中的{0,1,2}
-    //第二个三角形的三个顶点属性对应buf和col中的{3,4,5}
-    //先初始化第一个三角形并绘制然后是第二个
-
     float f1 = (50 - 0.1) / 2.0;
     float f2 = (50 + 0.1) / 2.0;
 
@@ -150,6 +136,20 @@ void rst::rasterizer::draw(pos_buf_id pos_buffer, ind_buf_id ind_buffer, col_buf
 
         rasterize_triangle(t);
     }
+
+    for(int i = 0;i < width;i ++)
+    {
+        for(int j = 0;j < height;j ++)
+        {
+            Vector3f color(0,0,0);
+            for(int k = 0;k < 4;k ++)
+            {
+                int idx = (height - j - 1) * width * sample_num + i * sample_num + k;
+                color += frame[idx] / 4.0f;
+            }
+            set_pixel({(float)i,(float)j,0},color);
+        }
+    }
 }
 
 //Screen space rasterization
@@ -177,16 +177,6 @@ void rst::rasterizer::rasterize_triangle(const Triangle& t) {
 
     int y_min = std::floor(y0);
     int y_max = std::ceil(y1);
-
-    
-    
-    //for(auto i : t.v)
-    //{
-    //    std::cout<<i.x()<<" "<<i.y()<<" "<<i.z()<<std::endl;
-    //}
-
-    //if(insideTriangle(350,120,t.v)) std::cout<<"Yes"<<std::endl;
-    //else std::cout<<"No"<<std::endl;
     
     //问题：程序像素中心的定义是？？(0,0)还是(0.5,0.5)
     //(0,0)
@@ -196,29 +186,26 @@ void rst::rasterizer::rasterize_triangle(const Triangle& t) {
     {
         for(int j = y_min;j <= y_max;j ++)
         {
-            
-            auto[alpha, beta, gamma] = computeBarycentric2D(i, j, t.v);
-            float w_reciprocal = 1.0/(alpha / v[0].w() + beta / v[1].w() + gamma / v[2].w());
-            float z_interpolated = alpha * v[0].z() / v[0].w() + beta * v[1].z() / v[1].w() + gamma * v[2].z() / v[2].w();        
-            z_interpolated *= w_reciprocal;
-            int idx = get_index(i,j);
-            bool visible = (z_interpolated < depth_buf[idx]);
-            bool update = false;
-            Vector3f color(0.0f,0.0f,0.0f);
-
-            for(int k = 0;k < 4;k ++)
+            for(int k = 0;k < sample_num;k ++)
             {
                 float x_coord = i + offset[k].first;
                 float y_coord = j + offset[k].second;
-                if(insideTriangle(x_coord,y_coord,t.v) && visible)
+                
+                if(insideTriangle(x_coord,y_coord,t.v))
                 {
-                    depth_buf[idx] = z_interpolated;
-                    update = true;
-                    color += t.getColor() / 4.0f;        
+                    auto[alpha, beta, gamma] = computeBarycentric2D(x_coord, y_coord, t.v);
+                    float w_reciprocal = 1.0/(alpha / v[0].w() + beta / v[1].w() + gamma / v[2].w());
+                    float z_interpolated = alpha * v[0].z() / v[0].w() + beta * v[1].z() / v[1].w() + gamma * v[2].z() / v[2].w();        
+                    z_interpolated *= w_reciprocal;
+
+                    int idx = (height - 1 - j) * width * sample_num + i * sample_num + k;
+                    if(z_interpolated < depth_buf[idx])
+                    {
+                        depth_buf[idx] = z_interpolated;
+                        frame[idx] = t.getColor();
+                    }
                 }
             }
-
-            if(update) set_pixel({(float)i,(float)j,0},color);   
         }
         
     }
@@ -247,6 +234,7 @@ void rst::rasterizer::clear(rst::Buffers buff)
     if ((buff & rst::Buffers::Color) == rst::Buffers::Color)
     {
         std::fill(frame_buf.begin(), frame_buf.end(), Eigen::Vector3f{0, 0, 0});
+        std::fill(frame.begin(),frame.end(),Eigen::Vector3f{0,0,0});
     }
     if ((buff & rst::Buffers::Depth) == rst::Buffers::Depth)
     {
@@ -257,7 +245,8 @@ void rst::rasterizer::clear(rst::Buffers buff)
 rst::rasterizer::rasterizer(int w, int h) : width(w), height(h)
 {
     frame_buf.resize(w * h);
-    depth_buf.resize(w * h);
+    frame.resize(w * h * sample_num);
+    depth_buf.resize(w * h * sample_num);
 }
 
 int rst::rasterizer::get_index(int x, int y)

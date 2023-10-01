@@ -91,11 +91,13 @@ namespace rst
         std::map<int, std::vector<Eigen::Vector3f>> col_buf;
 
         std::vector<Eigen::Vector3f> frame_buf;
+        std::vector<Eigen::Vector3f> frame;
 
         std::vector<float> depth_buf;
         int get_index(int x, int y);
 
         int width, height;
+        int sample_num = 4;
 
         int next_id = 0;
         int get_next_id() { return next_id++; }

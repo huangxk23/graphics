@@ -53,5 +53,6 @@ for(int i = x_min;i <= x_max;i++)
 ```
 ![img3](./img/output3.png)
 
-给每一个采样点维护一个深度值之后：
+给每一个采样点维护一个深度值和颜色之后并在计算所有采样点的数值之后再计算pixel的平均值：
+![img4](./img/output4.png)
 
