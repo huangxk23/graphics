@@ -436,3 +436,17 @@ shade(p, wo)
          L_indir = shade(q, -wi) * f_r * cos θ / pdf_hemi / P_RR
      Return L_dir + L_indir
 ```
+
+
+### 代码框架解读
+看懂的七七八八，不知从何写起，先挖个坑吧。
+
+### 实验结果
+明明照着算法写的，结果一边漆黑以及都是背景颜色蓝色。。。原因主要是cornellbox的墙壁的包围盒高度为零，t_enter < t_exit判断为不相交会导致光线达不到墙壁上面，也就是达不到天花板上面的灯，需要修改为<=;
+![img](./img/try3.PNG)
+
+spp为256时的结果：
+![img](./img/spp256.PNG)
+
+可以看到有白色的噪点，原因是pdf接近于零的时候除以pdf会得到一个较大的数值，对于pdf接近于0的时候直接将radiance记为0即可。
+![img]
